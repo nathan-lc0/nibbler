@@ -244,8 +244,12 @@ function startup() {
 		case "hash":
 			let mb = parseInt(msg.val, 10);
 			if (Number.isNaN(mb) === false) {
-				let gb = Math.floor(mb / 1024);
-				set_checks("Engine", "Hash", `${gb} GB`);
+				if (mb >= 1024) {
+					let gb = Math.floor(mb / 1024);
+					set_checks("Engine", "Hash", `${gb} GiB`);
+				} else {
+					set_checks("Engine", "Hash", `${mb} MiB`);
+				}
 			} else {
 				set_checks("Engine", "Hash", "");			// i.e. clear all
 			}
@@ -3151,7 +3155,7 @@ function menu_build() {
 					label: "Hash",
 					submenu: [
 						{
-							label: "16 GB",
+							label: "16 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3163,7 +3167,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "12 GB",
+							label: "12 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3175,7 +3179,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "10 GB",
+							label: "10 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3187,7 +3191,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "8 GB",
+							label: "8 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3199,7 +3203,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "6 GB",
+							label: "6 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3211,7 +3215,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "4 GB",
+							label: "4 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3223,7 +3227,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "2 GB",
+							label: "2 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3235,7 +3239,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "1 GB",
+							label: "1 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3247,7 +3251,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "512 MB",
+							label: "512 MiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3259,7 +3263,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "256 MB",
+							label: "256 MiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3271,7 +3275,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "128 MB",
+							label: "128 MiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3283,7 +3287,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "64 MB",
+							label: "64 MiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3295,7 +3299,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "16 MB",
+							label: "16 MiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {

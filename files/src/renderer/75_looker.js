@@ -21,17 +21,16 @@ function NewLooker() {
 	return looker;
 }
 
-function chessDbEnoughPieces(fen) {
-	const MIN_TOTAL = 10, MIN_NON_PAWN = 4;
-	return (countPieces(fen) >= MIN_TOTAL && countPieces(fen, true) >= MIN_NON_PAWN)
-}
-
-function countPieces(fen, attackers = false) {
+function countPieces(fen) {
 	let board = fen.toLowerCase().split(" ")[0].split("");
-	let pieces = "qrbn";
-	if (!attackers) pieces += "kp";
+	let pieces = "qrbnkp";
 	const count = board.length - board.filter((fenPiece) => !pieces.includes(fenPiece)).length;
 	return count;
+}
+
+function chessDbEnoughPieces(fen) {
+	const MIN_TOTAL = 7;
+	return countPieces(fen) > MIN_TOTAL;
 }
 
 let looker_props = {
