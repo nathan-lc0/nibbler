@@ -247,6 +247,16 @@ function new_chessdbcn_move(board, raw_item) {			// The object with info about a
 	return ret;
 }
 
+function convert_tb_mate_scores(score) {
+	if (score >  250) return `M${Math.ceil((300 - score) * 100 / 2).toFixed()}`;
+	if (score < -250) return `-M${Math.ceil((300 + score) * 100 / 2).toFixed()}`;
+	if (score >  200) return `DTZ ${((250 - score) * 100).toFixed()}`;
+	if (score < -200) return `-DTZ ${((250 + score) * 100).toFixed()}`;
+	if (score >  150) return `DTZ ${((200 - score) * 100).toFixed()}`;
+	if (score < -150) return `-DTZ ${((200 + score) * 100).toFixed()}`;
+	return score.toFixed(2);
+}
+
 let chessdbcn_move_props = {
 
 	text: function(pov) {								// pov can be null for current
@@ -257,7 +267,8 @@ let chessdbcn_move_props = {
 			score = 0 - this.score;
 		}
 
-		let s = score.toFixed(2);
+		let s = score;
+		s = convert_tb_mate_scores(s);
 		if (s !== "0.00" && s[0] !== "-") {
 			s = "+" + s;
 		}
