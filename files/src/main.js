@@ -3337,6 +3337,18 @@ function menu_build() {
 							}
 						},
 						{
+							label: "256",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_uci_option_permanent",
+									args: ["MultiPV", 256]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
 							label: "10",
 							type: "checkbox",
 							checked: false,

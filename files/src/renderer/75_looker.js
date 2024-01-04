@@ -243,18 +243,18 @@ let looker_props = {
 function new_chessdbcn_move(board, raw_item) {			// The object with info about a single move in a chessdbcn object.
 	let ret = Object.create(chessdbcn_move_props);
 	ret.active = board.active;
-	ret.score = raw_item.score / 100;
+	ret.score = raw_item.score;
 	return ret;
 }
 
 function convert_tb_mate_scores(score) {
-	if (score >  250) return `M${Math.ceil((300 - score) * 100 / 2).toFixed()}`;
-	if (score < -250) return `-M${Math.ceil((300 + score) * 100 / 2).toFixed()}`;
-	if (score >  200) return `DTZ ${((250 - score) * 100).toFixed()}`;
-	if (score < -200) return `-DTZ ${((250 + score) * 100).toFixed()}`;
-	if (score >  150) return `DTZ ${((200 - score) * 100).toFixed()}`;
-	if (score < -150) return `-DTZ ${((200 + score) * 100).toFixed()}`;
-	return score.toFixed(2);
+	if (score >  25000) return `M${Math.ceil((30000 - score) / 2)}`;
+	if (score < -25000) return `-M${Math.ceil((30000 + score) / 2)}`;
+	if (score >  20000) return `DTZ ${25000 - score}`;
+	if (score < -20000) return `-DTZ ${25000 + score}`;
+	if (score >  15000) return `DTZ ${20000 - score}`;
+	if (score < -15000) return `-DTZ ${20000 + score}`;
+	return (score / 100).toFixed(2);
 }
 
 let chessdbcn_move_props = {
@@ -272,6 +272,8 @@ let chessdbcn_move_props = {
 		if (s !== "0.00" && s[0] !== "-") {
 			s = "+" + s;
 		}
+
+		console.log(s);
 
 		return `API: <span class="blue">${s}</span>`;
 	},
