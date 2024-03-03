@@ -42,7 +42,7 @@ let looker_props = {
 
 	add_to_queue: function(board) {
 
-		if (!config.looker_api || !board.normalchess) {
+		if (!config.looker_api || (!board.normalchess && board.castling !== "")) {
 			return;
 		}
 
