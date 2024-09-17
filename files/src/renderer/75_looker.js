@@ -21,6 +21,18 @@ function NewLooker() {
 	return looker;
 }
 
+function countPieces(fen) {
+	let board = fen.toLowerCase().split(" ")[0].split("");
+	let pieces = "qrbnkp";
+	const count = board.length - board.filter((fenPiece) => !pieces.includes(fenPiece)).length;
+	return count;
+}
+
+function chessDbEnoughPieces(fen) {
+	const MIN_TOTAL = 7;
+	return countPieces(fen) > MIN_TOTAL;
+}
+
 let looker_props = {
 
 	clear_queue: function() {
@@ -30,7 +42,7 @@ let looker_props = {
 
 	add_to_queue: function(board) {
 
-		if (!config.looker_api || !board.normalchess) {
+		if (!config.looker_api || (!board.normalchess && board.castling !== "")) {
 			return;
 		}
 
@@ -143,10 +155,11 @@ let looker_props = {
 		let friendly_fen = query.board.fen(true);
 		let fen_for_web = ReplaceAll(friendly_fen, " ", "%20");
 
-		let url;
+		let url, url_queue = "";
 
 		if (query.db_name === "chessdbcn") {
 			url = `http://www.chessdb.cn/cdb.php?action=queryall&json=1&board=${fen_for_web}`;
+			url_queue = `http://www.chessdb.cn/cdb.php?action=queue&board=${fen_for_web}`;
 		} else if (query.db_name === "lichess_masters") {
 			url = `http://explorer.lichess.ovh/masters?topGames=0&fen=${fen_for_web}`;
 		} else if (query.db_name === "lichess_plebs") {
@@ -167,6 +180,15 @@ let looker_props = {
 			return response.json();
 		}).then(raw_object => {
 			this.handle_response_object(query, raw_object);
+			console.log(raw_object);
+			if (
+				chessDbEnoughPieces(friendly_fen) &&
+				url_queue != "" &&
+				(raw_object.status == "unknown" || raw_object.moves?.length < 5)
+			) {
+				fetch(url_queue);
+				hub.set_special_message("Requested to ChessDB", "green", 250);
+			}
 		});
 	},
 
@@ -221,8 +243,18 @@ let looker_props = {
 function new_chessdbcn_move(board, raw_item) {			// The object with info about a single move in a chessdbcn object.
 	let ret = Object.create(chessdbcn_move_props);
 	ret.active = board.active;
-	ret.score = raw_item.score / 100;
+	ret.score = raw_item.score;
 	return ret;
+}
+
+function convert_tb_mate_scores(score) {
+	if (score >  25000) return `M${Math.ceil((30000 - score) / 2)}`;
+	if (score < -25000) return `-M${Math.ceil((30000 + score) / 2)}`;
+	if (score >  20000) return `DTZ ${25000 - score}`;
+	if (score < -20000) return `-DTZ ${25000 + score}`;
+	if (score >  15000) return `DTZ ${20000 - score}`;
+	if (score < -15000) return `-DTZ ${20000 + score}`;
+	return (score / 100).toFixed(2);
 }
 
 let chessdbcn_move_props = {
@@ -235,10 +267,13 @@ let chessdbcn_move_props = {
 			score = 0 - this.score;
 		}
 
-		let s = score.toFixed(2);
+		let s = score;
+		s = convert_tb_mate_scores(s);
 		if (s !== "0.00" && s[0] !== "-") {
 			s = "+" + s;
 		}
+
+		console.log(s);
 
 		return `API: <span class="blue">${s}</span>`;
 	},

@@ -727,6 +727,7 @@ const position_prototype = {
 
 		if (long_flag) {
 			possible_rights_chars = possible_rights_chars.slice(0, king_loc.x);
+			possible_rights_chars.reverse();		// So we propose the shortest move first, if more than 1 is allowed by the rights.
 		} else {
 			possible_rights_chars = possible_rights_chars.slice(king_loc.x + 1);
 		}
@@ -752,6 +753,29 @@ const position_prototype = {
 			s = ReplaceAll(s, String.fromCodePoint(n), "-");
 		}
 
+		// If the string contains any dots it'll be something like "1.e4" or "...e4" or whatnot...
+
+		let lio = s.lastIndexOf(".");
+		if (lio !== -1) {
+			s = s.slice(lio + 1);
+		}
+
+		// At this point, if s is actually a UCI string (which it won't be in real PGN) we can return it.
+		// This is a hack to allow pasting of stuff from non-PGN sources I guess...
+
+		if (s.length === 4 || (s.length === 5 && ["q", "r", "b", "n"].includes(s[4]))) {
+			if (s[0] >= "a" && s[0] <= "h" &&
+				s[1] >= "1" && s[1] <= "8" &&
+				s[2] >= "a" && s[2] <= "h" &&
+				s[3] >= "1" && s[3] <= "8"
+			) {
+				let tmp = this.c960_castling_converter(s);
+				if (!this.illegal(tmp)) {
+					return [tmp, ""];
+				}
+			}
+		}
+
 		// Delete things we don't need...
 
 		s = ReplaceAll(s, "x", "");
@@ -759,13 +783,6 @@ const position_prototype = {
 		s = ReplaceAll(s, "#", "");
 		s = ReplaceAll(s, "!", "");
 		s = ReplaceAll(s, "?", "");
-
-		// If the string contains any dots it'll be something like "1.e4" or "...e4" or whatnot...
-
-		let lio = s.lastIndexOf(".");
-		if (lio !== -1) {
-			s = s.slice(lio + 1);
-		}
 
 		// Fix castling with zeroes...
 

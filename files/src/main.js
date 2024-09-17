@@ -244,8 +244,12 @@ function startup() {
 		case "hash":
 			let mb = parseInt(msg.val, 10);
 			if (Number.isNaN(mb) === false) {
-				let gb = Math.floor(mb / 1024);
-				set_checks("Engine", "Hash", `${gb} GB`);
+				if (mb >= 1024) {
+					let gb = Math.floor(mb / 1024);
+					set_checks("Engine", "Hash", `${gb} GiB`);
+				} else {
+					set_checks("Engine", "Hash", `${mb} MiB`);
+				}
 			} else {
 				set_checks("Engine", "Hash", "");			// i.e. clear all
 			}
@@ -371,7 +375,10 @@ function menu_build() {
 							alert(win, messages.save_not_enabled);
 							return;
 						}
-						let file = save_dialog(win, {defaultPath: config.pgn_dialog_folder});
+						let file = save_dialog(win, {
+							defaultPath: config.pgn_dialog_folder,
+							filters: [{name: "PGN", extensions: ["pgn"]}, {name: "All files", extensions: ["*"]}]
+						});
 						if (typeof file === "string" && file.length > 0) {
 							win.webContents.send("call", {
 								fn: "save",
@@ -807,6 +814,16 @@ function menu_build() {
 						win.webContents.send("call", {
 							fn: "set_behaviour",
 							args: ["back_analysis"]
+						});
+					}
+				},
+				{
+					label: "Auto-evaluate line, backwards (ucinewgame)",
+					accelerator: "Ctrl+Shift+F12",
+					click: () => {
+						win.webContents.send("call", {
+							fn: "set_behaviour",
+							args: ["back_analysis_ucinewgame"]
 						});
 					}
 				},
@@ -2580,6 +2597,30 @@ function menu_build() {
 							type: "separator"
 						},
 						{
+							label: "10,000,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit",
+									args: [10 * billion]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "5,000,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit",
+									args: [5 * billion]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
 							label: "1,000,000,000",
 							type: "checkbox",
 							checked: false,
@@ -2587,6 +2628,30 @@ function menu_build() {
 								win.webContents.send("call", {
 									fn: "set_node_limit",
 									args: [1 * billion]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "500,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit",
+									args: [500 * million]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "250,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit",
+									args: [250 * million]
 								});
 								// Will receive an ack IPC which sets menu checks.
 							}
@@ -2604,6 +2669,30 @@ function menu_build() {
 							}
 						},
 						{
+							label: "50,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit",
+									args: [50 * million]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "25,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit",
+									args: [25 * million]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
 							label: "10,000,000",
 							type: "checkbox",
 							checked: false,
@@ -2611,6 +2700,18 @@ function menu_build() {
 								win.webContents.send("call", {
 									fn: "set_node_limit",
 									args: [10 * million]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "5,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit",
+									args: [5 * million]
 								});
 								// Will receive an ack IPC which sets menu checks.
 							}
@@ -2659,42 +2760,6 @@ function menu_build() {
 								win.webContents.send("call", {
 									fn: "set_node_limit",
 									args: [1000]
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "100",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_node_limit",
-									args: [100]
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "10",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_node_limit",
-									args: [10]
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "2",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_node_limit",
-									args: [2]
 								});
 								// Will receive an ack IPC which sets menu checks.
 							}
@@ -2740,6 +2805,30 @@ function menu_build() {
 					label: "Limit - auto-eval / play",
 					submenu: [
 						{
+							label: "10,000,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit_special",
+									args: [10 * billion]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "5,000,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit_special",
+									args: [5 * billion]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
 							label: "1,000,000,000",
 							type: "checkbox",
 							checked: false,
@@ -2747,6 +2836,30 @@ function menu_build() {
 								win.webContents.send("call", {
 									fn: "set_node_limit_special",
 									args: [1 * billion]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "500,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit_special",
+									args: [500 * million]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "250,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit_special",
+									args: [250 * million]
 								});
 								// Will receive an ack IPC which sets menu checks.
 							}
@@ -2764,6 +2877,30 @@ function menu_build() {
 							}
 						},
 						{
+							label: "50,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit_special",
+									args: [50 * million]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "25,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit_special",
+									args: [25 * million]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
 							label: "10,000,000",
 							type: "checkbox",
 							checked: false,
@@ -2771,6 +2908,18 @@ function menu_build() {
 								win.webContents.send("call", {
 									fn: "set_node_limit_special",
 									args: [10 * million]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "5,000,000",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_node_limit_special",
+									args: [5 * million]
 								});
 								// Will receive an ack IPC which sets menu checks.
 							}
@@ -2819,42 +2968,6 @@ function menu_build() {
 								win.webContents.send("call", {
 									fn: "set_node_limit_special",
 									args: [1000]
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "100",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_node_limit_special",
-									args: [100]
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "10",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_node_limit_special",
-									args: [10]
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "2",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_node_limit_special",
-									args: [2]
 								});
 								// Will receive an ack IPC which sets menu checks.
 							}
@@ -2910,102 +3023,6 @@ function menu_build() {
 				{
 					label: "Threads",
 					submenu: [
-						{
-							label: "128",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_uci_option_permanent",
-									args: ["Threads", 128],
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "96",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_uci_option_permanent",
-									args: ["Threads", 96],
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "64",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_uci_option_permanent",
-									args: ["Threads", 64],
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "48",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_uci_option_permanent",
-									args: ["Threads", 48],
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "32",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_uci_option_permanent",
-									args: ["Threads", 32],
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "24",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_uci_option_permanent",
-									args: ["Threads", 24],
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "16",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_uci_option_permanent",
-									args: ["Threads", 16],
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "14",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_uci_option_permanent",
-									args: ["Threads", 14],
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
 						{
 							label: "12",
 							type: "checkbox",
@@ -3132,7 +3149,7 @@ function menu_build() {
 						{
 							label: "Warning about threads",
 							click: () => {
-								alert(win, messages.thread_warning);
+								alert(messages.thread_warning);
 							}
 						},
 					]
@@ -3141,43 +3158,19 @@ function menu_build() {
 					label: "Hash",
 					submenu: [
 						{
-							label: "120 GB",
+							label: "16 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
 								win.webContents.send("call", {
 									fn: "set_uci_option_permanent",
-									args: ["Hash", 120 * 1024]
+									args: ["Hash", 16 * 1024]
 								});
 								// Will receive an ack IPC which sets menu checks.
 							}
 						},
 						{
-							label: "56 GB",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_uci_option_permanent",
-									args: ["Hash", 56 * 1024]
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "24 GB",
-							type: "checkbox",
-							checked: false,
-							click: () => {
-								win.webContents.send("call", {
-									fn: "set_uci_option_permanent",
-									args: ["Hash", 24 * 1024]
-								});
-								// Will receive an ack IPC which sets menu checks.
-							}
-						},
-						{
-							label: "12 GB",
+							label: "12 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3189,7 +3182,19 @@ function menu_build() {
 							}
 						},
 						{
-							label: "8 GB",
+							label: "10 GiB",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_uci_option_permanent",
+									args: ["Hash", 10 * 1024]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "8 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3201,7 +3206,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "6 GB",
+							label: "6 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3213,7 +3218,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "4 GB",
+							label: "4 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3225,7 +3230,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "2 GB",
+							label: "2 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3237,7 +3242,7 @@ function menu_build() {
 							}
 						},
 						{
-							label: "1 GB",
+							label: "1 GiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
@@ -3249,13 +3254,61 @@ function menu_build() {
 							}
 						},
 						{
-							label: "0 GB",
+							label: "512 MiB",
 							type: "checkbox",
 							checked: false,
 							click: () => {
 								win.webContents.send("call", {
 									fn: "set_uci_option_permanent",
-									args: ["Hash", 1]					// 1 MB is Stockfish actual minimum.
+									args: ["Hash", 1 * 512]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "256 MiB",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_uci_option_permanent",
+									args: ["Hash", 1 * 256]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "128 MiB",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_uci_option_permanent",
+									args: ["Hash", 1 * 128]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "64 MiB",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_uci_option_permanent",
+									args: ["Hash", 1 * 64]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "16 MiB",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_uci_option_permanent",
+									args: ["Hash", 1 * 16]
 								});
 								// Will receive an ack IPC which sets menu checks.
 							}
@@ -3266,7 +3319,7 @@ function menu_build() {
 						{
 							label: "I want other hash options!",
 							click: () => {
-								alert(win, messages.about_hashes);
+								alert(messages.about_hashes);
 							}
 						}
 					]
@@ -3274,6 +3327,42 @@ function menu_build() {
 				{
 					label: "MultiPV",
 					submenu: [
+						{
+							label: "500",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_uci_option_permanent",
+									args: ["MultiPV", 500]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "256",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_uci_option_permanent",
+									args: ["MultiPV", 256]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
+						{
+							label: "10",
+							type: "checkbox",
+							checked: false,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "set_uci_option_permanent",
+									args: ["MultiPV", 10]
+								});
+								// Will receive an ack IPC which sets menu checks.
+							}
+						},
 						{
 							label: "5",
 							type: "checkbox",
@@ -3380,6 +3469,16 @@ function menu_build() {
 						win.webContents.send("call", {
 							fn: "set_behaviour",
 							args: ["self_play"],
+						});
+					}
+				},
+				{
+					label: "Start self-play (ucinewgame)",
+					accelerator: "Ctrl+F11",
+					click: () => {
+						win.webContents.send("call", {
+							fn: "set_behaviour",
+							args: ["self_play_ucinewgame"],
 						});
 					}
 				},
@@ -4127,6 +4226,17 @@ function menu_build() {
 								win.webContents.send("call", {
 									fn: "toggle",
 									args: ["clear_log"],
+								});
+							}
+						},
+						{
+							label: "Use unique logfile each time",
+							type: "checkbox",
+							checked: config.logfile_timestamp,
+							click: () => {
+								win.webContents.send("call", {
+									fn: "toggle",
+									args: ["logfile_timestamp"],
 								});
 							}
 						},
